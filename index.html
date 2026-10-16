@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#141218">
+<title>TextForge</title>
+<style>
+:root{
+  --md-primary:#d0bcff;
+  --md-on-primary:#381e72;
+  --md-primary-container:#4f378b;
+  --md-on-primary-container:#eaddff;
+  --md-secondary-container:#4a4458;
+  --md-on-secondary-container:#e8def8;
+  --md-surface:#141218;
+  --md-surface-container:#1d1b20;
+  --md-surface-container-high:#2b2930;
+  --md-surface-container-highest:#36343b;
+  --md-on-surface:#e6e0e9;
+  --md-on-surface-variant:#cac4d0;
+  --md-outline:#938f99;
+  --md-outline-variant:#49454f;
+  --md-error:#f2b8b5;
+  --md-success:#b5e5c0;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{
+  background:var(--md-surface);color:var(--md-on-surface);
+  font-family:'Google Sans','Roboto',-apple-system,BlinkMacSystemFont,sans-serif;
+  display:flex;flex-direction:column;
+  user-select:none;overflow:hidden;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+.topbar{
+  padding:14px 18px 12px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--md-outline-variant);
+  flex-shrink:0;
+}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.logo{
+  width:40px;height:40px;border-radius:12px;
+  background:linear-gradient(135deg,var(--md-primary),#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--md-on-primary);font-weight:900;font-size:20px;
+}
+.topbar-title{font-size:18px;font-weight:700;letter-spacing:-.3px;}
+.topbar-sub{font-size:11px;color:var(--md-on-surface-variant);margin-top:1px;}
+.icon-btn{
+  width:40px;height:40px;background:transparent;border:none;
+  color:var(--md-on-surface);border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.15s;
+}
+.icon-btn:hover{background:var(--md-surface-container-high);}
+.icon-btn svg{width:20px;height:20px;}
+
+.content{
+  flex:1;overflow-y:auto;
+  padding:16px 14px 20px;
+  display:flex;flex-direction:column;gap:12px;
+}
+
+.label{
+  font-size:11px;font-weight:800;color:var(--md-on-surface-variant);
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding-left:4px;
+}
+
+textarea{
+  width:100%;
+  min-height:120px;
+  padding:14px 16px;
+  background:var(--md-surface-container-high);
+  border:1px solid var(--md-outline-variant);
+  border-radius:20px;
+  color:var(--md-on-surface);
+  font-family:'Roboto Mono',monospace;
+  font-size:13px;
+  line-height:1.5;
+  resize:vertical;
+  outline:none;
+  transition:.15s;
+  -webkit-user-select:text;user-select:text;
+}
+textarea:focus{border-color:var(--md-primary);box-shadow:0 0 0 2px rgba(208,188,255,.15);}
+textarea::placeholder{color:var(--md-on-surface-variant);}
+
+.chips{
+  display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;
+  scrollbar-width:none;
+}
+.chips::-webkit-scrollbar{display:none;}
+.chip{
+  padding:8px 14px;background:var(--md-surface-container-high);
+  border:1px solid var(--md-outline-variant);
+  color:var(--md-on-surface-variant);
+  border-radius:20px;font-size:12px;font-weight:700;
+  white-space:nowrap;cursor:pointer;transition:.15s;
+  font-family:inherit;flex-shrink:0;
+}
+.chip:hover{background:var(--md-surface-container-highest);color:var(--md-on-surface);}
+.chip.active{
+  background:var(--md-secondary-container);
+  color:var(--md-on-secondary-container);
+  border-color:transparent;
+}
+
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{
+  padding:12px 18px;border:none;border-radius:14px;
+  font-family:inherit;font-size:13px;font-weight:700;
+  cursor:pointer;transition:.15s;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  flex:1;min-width:100px;
+}
+.btn.primary{background:var(--md-primary);color:var(--md-on-primary);}
+.btn.primary:hover{filter:brightness(1.1);}
+.btn.ghost{background:var(--md-surface-container-high);color:var(--md-on-surface);}
+.btn.ghost:hover{background:var(--md-surface-container-highest);}
+.btn svg{width:16px;height:16px;}
+
+.output-wrap{
+  background:var(--md-surface-container);
+  border:1px solid var(--md-outline-variant);
+  border-radius:20px;
+  padding:14px 16px;
+  min-height:100px;
+  font-family:'Roboto Mono',monospace;
+  font-size:13px;
+  line-height:1.5;
+  word-break:break-all;
+  white-space:pre-wrap;
+  color:var(--md-on-surface);
+  -webkit-user-select:text;user-select:text;
+  position:relative;
+}
+.output-wrap.empty{color:var(--md-on-surface-variant);font-style:italic;}
+
+.stats{
+  display:flex;gap:12px;flex-wrap:wrap;
+  font-size:11px;color:var(--md-on-surface-variant);
+  padding:0 4px;
+}
+.stat{display:flex;gap:4px;}
+.stat b{color:var(--md-primary);}
+
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--md-surface-container-highest);
+  color:var(--md-on-surface);
+  padding:12px 20px;border-radius:24px;
+  font-size:13px;font-weight:700;
+  opacity:0;transition:.3s;z-index:400;pointer-events:none;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.chip-num{
+  display:inline-block;background:rgba(208,188,255,.15);
+  color:var(--md-primary);padding:1px 6px;border-radius:8px;
+  font-size:10px;font-weight:800;margin-left:4px;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">T</div>
+    <div>
+      <div class="topbar-title">TextForge</div>
+      <div class="topbar-sub">конвертер текста · локально</div>
+    </div>
+  </div>
+  <button class="icon-btn" id="btnWipe" title="Очистить всё">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+    </svg>
+  </button>
+</div>
+
+<div class="content">
+
+  <div class="label">Введи текст</div>
+  <textarea id="input" placeholder="Привет, мир! Hello world 123"></textarea>
+
+  <div class="stats">
+    <div class="stat">Символов: <b id="statChars">0</b></div>
+    <div class="stat">Слов: <b id="statWords">0</b></div>
+    <div class="stat">Строк: <b id="statLines">0</b></div>
+  </div>
+
+  <div class="label">Формат</div>
+  <div class="chips" id="chips">
+    <button class="chip active" data-fmt="upper">ВЕРХНИЙ</button>
+    <button class="chip" data-fmt="lower">нижний</button>
+    <button class="chip" data-fmt="title">Заглавные</button>
+    <button class="chip" data-fmt="sentence">Как в предложении</button>
+    <button class="chip" data-fmt="reverse">Реверс</button>
+    <button class="chip" data-fmt="base64">Base64</button>
+    <button class="chip" data-fmt="hex">HEX</button>
+    <button class="chip" data-fmt="binary">Binary</button>
+    <button class="chip" data-fmt="url">URL</button>
+    <button class="chip" data-fmt="rot13">ROT13</button>
+    <button class="chip" data-fmt="morse">Морзе</button>
+    <button class="chip" data-fmt="leetspeak">Leet</button>
+    <button class="chip" data-fmt="caesar">Цезарь +3</button>
+    <button class="chip" data-fmt="json">JSON escape</button>
+    <button class="chip" data-fmt="html">HTML escape</button>
+    <button class="chip" data-fmt="slug">Slug</button>
+    <button class="chip" data-fmt="camel">camelCase</button>
+    <button class="chip" data-fmt="snake">snake_case</button>
+    <button class="chip" data-fmt="kebab">kebab-case</button>
+    <button class="chip" data-fmt="count">Счётчик</button>
+    <button class="chip" data-fmt="unique">Уникальные строки</button>
+    <button class="chip" data-fmt="sort">Сортировка строк</button>
+    <button class="chip" data-fmt="shuffle">Перемешать строки</button>
+    <button class="chip" data-fmt="reverse-lines">Реверс строк</button>
+    <button class="chip" data-fmt="trim">Обрезать пробелы</button>
+    <button class="chip" data-fmt="nospace">Убрать пробелы</button>
+    <button class="chip" data-fmt="one-line">В одну строку</button>
+    <button class="chip" data-fmt="lorem">Lorem ipsum</button>
+    <button class="chip" data-fmt="hash-md5">MD5</button>
+    <button class="chip" data-fmt="hash-sha1">SHA-1</button>
+    <button class="chip" data-fmt="hash-sha256">SHA-256</button>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn primary" id="btnConvert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2 3 14h9l-1 8 10-12h-9Z"/>
+      </svg>
+      Конвертировать
+    </button>
+    <button class="btn ghost" id="btnSwap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 16V4M7 4 3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/>
+      </svg>
+      В обратную
+    </button>
+  </div>
+
+  <div class="label">Результат</div>
+  <div class="output-wrap empty" id="output">Результат появится здесь…</div>
+
+  <div class="btn-row">
+    <button class="btn primary" id="btnCopy">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2"/>
+        <path d="M5 15V5a2 2 0 0 1 2-2h10"/>
+      </svg>
+      Копировать
+    </button>
+    <button class="btn ghost" id="btnSendBack">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      В поле ввода
+    </button>
+    <button class="btn ghost" id="btnDownload">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+      </svg>
+      Скачать
+    </button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+const MORSE = {
+  'а':'.-','б':'-...','в':'.--','г':'--.','д':'-..','е':'.','ё':'.','ж':'...-','з':'--..',
+  'и':'..','й':'.---','к':'-.-','л':'.-..','м':'--','н':'-.','о':'---','п':'.--.','р':'.-.',
+  'с':'...','т':'-','у':'..-','ф':'..-.','х':'....','ц':'-.-.','ч':'---.','ш':'----','щ':'--.-',
+  'ъ':'--.--','ы':'-.--','ь':'-..-','э':'..-..','ю':'..--','я':'.-.-',
+  'a':'.-','b':'-...','c':'-.-.','d':'-..','e':'.','f':'..-.','g':'--.','h':'....','i':'..',
+  'j':'.---','k':'-.-','l':'.-..','m':'--','n':'-.','o':'---','p':'.--.','q':'--.-','r':'.-.',
+  's':'...','t':'-','u':'..-','v':'...-','w':'.--','x':'-..-','y':'-.--','z':'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....',
+  '6':'-....','7':'--...','8':'---..','9':'----.','.':'.-.-.-',',':'--..--','?':'..--..',
+  '!':'-.-.--','/':'-..-.','@':'.--.-.','-':'-....-','(':'-.--.',')':'-.--.-',' ':'/'
+};
+const MORSE_REV = Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
+
+function toBase64(str){
+  try{
+    return btoa(unescape(encodeURIComponent(str)));
+  }catch(e){ return '[ошибка]'; }
+}
+function fromBase64(str){
+  try{
+    return decodeURIComponent(escape(atob(str.trim())));
+  }catch(e){ return '[ошибка: невалидный base64]'; }
+}
+function toHex(str){
+  const enc = new TextEncoder().encode(str);
+  return Array.from(enc).map(b => b.toString(16).padStart(2,'0')).join(' ');
+}
+function fromHex(str){
+  const bytes = str.trim().split(/\s+/).map(h => parseInt(h, 16));
+  if(bytes.some(isNaN)) return '[ошибка: невалидный hex]';
+  try{
+    return new TextDecoder().decode(new Uint8Array(bytes));
+  }catch(e){ return '[ошибка]'; }
+}
+function toBinary(str){
+  const enc = new TextEncoder().encode(str);
+  return Array.from(enc).map(b => b.toString(2).padStart(8,'0')).join(' ');
+}
+function fromBinary(str){
+  const bytes = str.trim().split(/\s+/).map(b => parseInt(b, 2));
+  if(bytes.some(isNaN)) return '[ошибка: невалидный binary]';
+  try{
+    return new TextDecoder().decode(new Uint8Array(bytes));
+  }catch(e){ return '[ошибка]'; }
+}
+function rot13(str){
+  return str.replace(/[a-zA-Z]/g, c => {
+    const base = c <= 'Z' ? 65 : 97;
+    return String.fromCharCode((c.charCodeAt(0) - base + 13) % 26 + base);
+  });
+}
+function caesar(str, shift){
+  return str.replace(/[a-zA-Z]/g, c => {
+    const base = c <= 'Z' ? 65 : 97;
+    return String.fromCharCode((c.charCodeAt(0) - base + shift + 26) % 26 + base);
+  });
+}
+function toMorse(str){
+  return str.toLowerCase().split('').map(c => MORSE[c] || c).join(' ');
+}
+function fromMorse(str){
+  return str.trim().split(/\s+/).map(code => MORSE_REV[code] || code).join('');
+}
+function toLeet(str){
+  const map = {'a':'4','e':'3','i':'1','o':'0','s':'5','t':'7','b':'8','g':'9','l':'1','z':'2'};
+  return str.replace(/[a-z]/gi, c => map[c.toLowerCase()] || c);
+}
+function toSlug(str){
+  const map = {'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z',
+    'и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t',
+    'у':'u','ф':'f','х':'h','ц':'ts','ч':'ch','ш':'sh','щ':'sch','ъ':'','ы':'y','ь':'','э':'e',
+    'ю':'yu','я':'ya'};
+  return str.toLowerCase()
+    .split('').map(c => map[c] !== undefined ? map[c] : c).join('')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+function toCamel(str){
+  return str.toLowerCase().replace(/[^a-z0-9а-яё]+(.)?/gi, (_, c) => c ? c.toUpperCase() : '');
+}
+function toSnake(str){
+  return str.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^\wа-яё_]/gi, '');
+}
+function toKebab(str){
+  return str.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\wа-яё-]/gi, '');
+}
+function jsonEscape(str){
+  return JSON.stringify(str).slice(1, -1);
+}
+function htmlEscape(str){
+  return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+async function md5(str){
+  return await hashHex('MD5', str);
+}
+async function sha1(str){
+  return await hashHex('SHA-1', str);
+}
+async function sha256(str){
+  return await hashHex('SHA-256', str);
+}
+async function hashHex(algo, str){
+  try{
+    const buf = new TextEncoder().encode(str);
+    const hash = await crypto.subtle.digest(algo, buf);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }catch(e){ return '[ошибка: ' + e.message + ']'; }
+}
+function lorem(count){
+  const words = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'.split(' ');
+  const out = [];
+  for(let i = 0; i < count; i++) out.push(words[Math.floor(Math.random()*words.length)]);
+  return out.join(' ');
+}
+
+const FORMATS = {
+  'upper':      { name:'ВЕРХНИЙ',        convert:s => s.toUpperCase(),        reverse:null },
+  'lower':      { name:'нижний',         convert:s => s.toLowerCase(),        reverse:null },
+  'title':      { name:'Заглавные',      convert:s => s.replace(/\S+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()), reverse:null },
+  'sentence':   { name:'Как в предложении', convert:s => s.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase()), reverse:null },
+  'reverse':    { name:'Реверс',         convert:s => s.split('').reverse().join(''), reverse:s => s.split('').reverse().join('') },
+  'base64':     { name:'Base64',         convert:s => toBase64(s),            reverse:s => fromBase64(s) },
+  'hex':        { name:'HEX',            convert:s => toHex(s),               reverse:s => fromHex(s) },
+  'binary':     { name:'Binary',         convert:s => toBinary(s),            reverse:s => fromBinary(s) },
+  'url':        { name:'URL',            convert:s => encodeURIComponent(s),  reverse:s => decodeURIComponent(s) },
+  'rot13':      { name:'ROT13',          convert:s => rot13(s),               reverse:s => rot13(s) },
+  'morse':      { name:'Морзе',          convert:s => toMorse(s),             reverse:s => fromMorse(s) },
+  'leetspeak':  { name:'Leet',           convert:s => toLeet(s),              reverse:null },
+  'caesar':     { name:'Цезарь +3',      convert:s => caesar(s, 3),           reverse:s => caesar(s, -3) },
+  'json':       { name:'JSON escape',    convert:s => jsonEscape(s),          reverse:null },
+  'html':       { name:'HTML escape',    convert:s => htmlEscape(s),          reverse:null },
+  'slug':       { name:'Slug',           convert:s => toSlug(s),              reverse:null },
+  'camel':      { name:'camelCase',      convert:s => toCamel(s),             reverse:null },
+  'snake':      { name:'snake_case',     convert:s => toSnake(s),             reverse:null },
+  'kebab':      { name:'kebab-case',     convert:s => toKebab(s),             reverse:null },
+  'count':      { name:'Счётчик',        convert:s => s.length + ' символов, ' + s.split(/\s+/).filter(Boolean).length + ' слов, ' + s.split(/\n/).length + ' строк', reverse:null },
+  'unique':     { name:'Уникальные строки', convert:s => [...new Set(s.split('\n'))].join('\n'), reverse:null },
+  'sort':       { name:'Сортировка строк',  convert:s => s.split('\n').sort().join('\n'), reverse:null },
+  'shuffle':    { name:'Перемешать строки', convert:s => s.split('\n').sort(() => Math.random() - .5).join('\n'), reverse:null },
+  'reverse-lines': { name:'Реверс строк',   convert:s => s.split('\n').reverse().join('\n'), reverse:s => s.split('\n').reverse().join('\n') },
+  'trim':       { name:'Обрезать пробелы', convert:s => s.split('\n').map(l => l.trim()).join('\n'), reverse:null },
+  'nospace':    { name:'Убрать пробелы',   convert:s => s.replace(/\s+/g, ''), reverse:null },
+  'one-line':   { name:'В одну строку',    convert:s => s.replace(/\s+/g, ' ').trim(), reverse:null },
+  'lorem':      { name:'Lorem ipsum',      convert:s => lorem(30), reverse:null },
+  'hash-md5':   { name:'MD5',              convert:s => null, asyncConvert:async s => await md5(s) },
+  'hash-sha1':  { name:'SHA-1',            convert:s => null, asyncConvert:async s => await sha1(s) },
+  'hash-sha256':{ name:'SHA-256',          convert:s => null, asyncConvert:async s => await sha256(s) }
+};
+
+let currentFmt = 'upper';
+
+function getConverted(fmt, text, reverse){
+  const f = FORMATS[fmt];
+  if(!f) return text;
+  if(reverse && f.reverse) return f.reverse(text);
+  if(f.asyncConvert) return f.asyncConvert(text);
+  if(f.convert) return f.convert(text);
+  return text;
+}
+
+function updateStats(){
+  const s = $('input').value;
+  $('statChars').textContent = s.length;
+  $('statWords').textContent = s.split(/\s+/).filter(Boolean).length;
+  $('statLines').textContent = s.split('\n').length;
+}
+
+function updateOutput(){
+  const text = $('input').value;
+  if(!text.trim()){
+    $('output').textContent = 'Результат появится здесь…';
+    $('output').classList.add('empty');
+    return;
+  }
+  try{
+    const res = getConverted(currentFmt, text, false);
+    if(res && typeof res.then === 'function'){
+      res.then(r => {
+        $('output').textContent = r;
+        $('output').classList.remove('empty');
+      });
+    } else {
+      $('output').textContent = res;
+      $('output').classList.remove('empty');
+    }
+  }catch(e){
+    $('output').textContent = 'Ошибка: ' + e.message;
+    $('output').classList.remove('empty');
+  }
+}
+
+$('input').addEventListener('input', ()=>{ updateStats(); updateOutput(); });
+
+$('chips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  currentFmt = chip.dataset.fmt;
+  updateOutput();
+});
+
+$('btnConvert').onclick = updateOutput;
+
+$('btnSwap').onclick = ()=>{
+  const f = FORMATS[currentFmt];
+  if(!f || !f.reverse){
+    toast('Обратное преобразование недоступно');
+    return;
+  }
+  const cur = $('output').textContent;
+  if(!cur || $('output').classList.contains('empty')){
+    toast('Нечего конвертировать');
+    return;
+  }
+  try{
+    $('input').value = f.reverse(cur);
+    updateStats();
+    updateOutput();
+    toast('Обратное преобразование ✓');
+  }catch(e){
+    toast('Ошибка: ' + e.message);
+  }
+};
+
+$('btnCopy').onclick = async ()=>{
+  const txt = $('output').textContent;
+  if(!txt || $('output').classList.contains('empty')){
+    toast('Нечего копировать');
+    return;
+  }
+  try{
+    await navigator.clipboard.writeText(txt);
+    toast('Скопировано ✓');
+  }catch(e){
+    toast('Не удалось скопировать');
+  }
+};
+
+$('btnSendBack').onclick = ()=>{
+  const txt = $('output').textContent;
+  if(!txt || $('output').classList.contains('empty')){
+    toast('Нечего отправлять');
+    return;
+  }
+  $('input').value = txt;
+  updateStats();
+  updateOutput();
+  toast('Отправлено в поле ввода ✓');
+};
+
+$('btnDownload').onclick = ()=>{
+  const txt = $('output').textContent;
+  if(!txt || $('output').classList.contains('empty')){
+    toast('Нечего скачивать');
+    return;
+  }
+  const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'textforge_' + currentFmt + '_' + Date.now() + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast('Файл скачан ✓');
+};
+
+$('btnWipe').onclick = ()=>{
+  if(!confirm('Очистить текст и результат?')) return;
+  $('input').value = '';
+  updateStats();
+  updateOutput();
+};
+
+let toastTimer;p
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+updateStats();
+updateOutput();
+
+console.log('%cTextForge ready','color:#d0bcff;font-weight:900;font-size:14px;');
+</script>
+</body>
+</html>
